@@ -132,8 +132,7 @@ int main(int argc, char **argv)
 #endif
 
     // Allocate enough memory to store a code table:
-    codeTableEntry *
-        codeTable = malloc(numDiffChars * sizeof(codeTableEntry)); // Allocate space for code table
+    codeTableEntry *codeTable = malloc(numDiffChars * sizeof(codeTableEntry)); // Allocate space for code table
     // Generate the code table:
     generateCodeTable(tree.root, codeTable);
 

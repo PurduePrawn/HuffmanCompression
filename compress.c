@@ -1,4 +1,14 @@
 #include "tree.h"
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)         \
+    ((byte) & 0x80 ? '1' : '0'),     \
+        ((byte) & 0x40 ? '1' : '0'), \
+        ((byte) & 0x20 ? '1' : '0'), \
+        ((byte) & 0x10 ? '1' : '0'), \
+        ((byte) & 0x08 ? '1' : '0'), \
+        ((byte) & 0x04 ? '1' : '0'), \
+        ((byte) & 0x02 ? '1' : '0'), \
+        ((byte) & 0x01 ? '1' : '0')
 
 // Recursive function to generate huffman codes:
 void generateCodeEntries(TreeNode *node, codeTableEntry *codeTable, int *index, int iterations, int codeAsDecimal)
@@ -59,6 +69,7 @@ char *getCode(codeTableEntry *codeTable, int tableLength, char val)
     return NULL;
 }
 
+// Recursive post-order generator
 void addPostOrderEntry(TreeNode *tn, char *postOrder, int *index)
 {
     if (tn == NULL)
@@ -74,6 +85,7 @@ void addPostOrderEntry(TreeNode *tn, char *postOrder, int *index)
     *index = *index + 1;
 }
 
+// Main post-order generator
 char *generatePostOrder(Tree tree, int length)
 {
     if (tree.root == NULL)
@@ -92,12 +104,57 @@ char *generatePostOrder(Tree tree, int length)
     return postOrder;
 }
 
+// Changes control 0s and 1s to bits and writes compressed post order to file
+void compressAndWritePostOrder(char *postOrder, int postOrderLength, FILE *file)
+{
+    int index = 0;          // Where we currently are in the byte (the index marking the start of the portion of the byte still needing to be filled)
+    unsigned char byte = 0; // The number that will store current progress on construction of a byte
+    unsigned char control;  // Control bit used whenever a 1 is encountered
+    unsigned char c;        // Will store any 1's corresponding character
+
+    // For every control bit in the post order array (i increments by 2 for 1s and 1 for 0s):
+    for (int i = 0; i < postOrderLength; i += postOrder[i] + 1)
+    {
+
+        if (postOrder[i] == 1)
+        {
+            printf("INDEX: %d ", index);
+            printf("BYTE: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(byte));
+            control = 0x80 >> index; // 10000000 (Shift control bit (1) in order to get to that index)
+            printf("CONTROL: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(control));
+            c = postOrder[i + 1]; // 01101001 (example)
+            printf("C: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(c));
+            unsigned char cNew = c >> (index + 1); // 00110100 (shift c to get to the index after the control bit)
+            printf("C NEW: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(cNew));
+            byte = byte | control | cNew;               // 10110100 (Add byte, control, and part of the character byte together into a completed byte)
+            fputc((int)byte, file);                     // Write the byte to the file
+            unsigned char mask = pow(2, index + 1) - 1; // 00000001 (Add 1s to the end to access the last 8-(index+1) bits of c)
+            unsigned char cEnd = c & mask;              // 00000001
+            printf("C END: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(cEnd));
+            byte = cEnd << (NUM_BITS_IN_BYTE - (index + 1)); // 10000000 (shift those end elements to the beginning of byte)
+            index = index + 1;
+        }
+        else
+        {
+            index++; // Byte already has zeros at the end, so just shift the byte index
+        }
+        if (index == NUM_BITS_IN_BYTE)
+        { // If byte is full, write it to file.
+            fputc((int)byte, file);
+            index = 0;
+            byte = 0;
+        }
+    }
+    fputc((int)byte, file); // Write whatever is left in the byte
+}
 // Function to generate compressed file:
 void compress(char *postOrder, int postOrderLength, codeTableEntry *codeTable, int codeTableLength, char *article, char *filename)
 {
     // Open file:
     FILE *fp = fopen(filename, "wb");
-    fwrite(postOrder, sizeof(char), postOrderLength, fp);
+    // fwrite(postOrder, sizeof(char), postOrderLength, fp); // Old, non-compressed post order
+    compressAndWritePostOrder(postOrder, postOrderLength, fp);
+
     char *code;                            // The huffman code of a character in the article
     char byte[NUM_BITS_IN_BYTE + 1] = {0}; // An array (with a terminating null character) that will be filled with "bits" and written to the output file
 
