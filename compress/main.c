@@ -105,15 +105,15 @@ int main(int argc, char **argv)
         }
     }
 
-    for (j = 0; j < numDiffChars; j++)
-    {
-        printf("%c: %d\n", charFrequencies[j * 2], charFrequencies[j * 2 + 1]);
-    }
+    // for (j = 0; j < numDiffChars; j++)
+    // {
+    //     printf("%c: %d\n", charFrequencies[j * 2], charFrequencies[j * 2 + 1]);
+    // }
     qsort(charFrequencies, numDiffChars, sizeof(int) * 2, cmpfunc);
-    for (j = 0; j < numDiffChars; j++)
-    {
-        printf("%c: %d\n", charFrequencies[j * 2], charFrequencies[j * 2 + 1]);
-    }
+    // for (j = 0; j < numDiffChars; j++)
+    // {
+    //     printf("%c: %d\n", charFrequencies[j * 2], charFrequencies[j * 2 + 1]);
+    // }
 
     // Get end of article from input file:
     char *article;

@@ -96,10 +96,10 @@ char *generatePostOrder(Tree tree, int length)
     char *postOrder = malloc(length * sizeof(char)); // Allocate just enough space to store control bits, characters, and terminating 0:
     addPostOrderEntry(tree.root, postOrder, &index);
     postOrder[index] = 0;
-    for (int i = 0; i < index + 1; i++)
-    {
-        printf("%d ", (int)postOrder[i]);
-    }
+    // for (int i = 0; i < index + 1; i++)
+    // {
+    //     printf("%d ", (int)postOrder[i]);
+    // }
 
     return postOrder;
 }
@@ -119,23 +119,32 @@ void compressAndWritePostOrder(char *postOrder, int postOrderLength, FILE *file)
         if (postOrder[i] == 1)
         {
             printf("INDEX: %d ", index);
+            printf("\n");
             printf("BYTE: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(byte));
+            printf("\n");
             control = 0x80 >> index; // 10000000 (Shift control bit (1) in order to get to that index)
             printf("CONTROL: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(control));
+            printf("\n");
             c = postOrder[i + 1]; // 01101001 (example)
             printf("C: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(c));
+            printf("\n");
             unsigned char cNew = c >> (index + 1); // 00110100 (shift c to get to the index after the control bit)
             printf("C NEW: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(cNew));
+            printf("\n");
             byte = byte | control | cNew;               // 10110100 (Add byte, control, and part of the character byte together into a completed byte)
             fputc((int)byte, file);                     // Write the byte to the file
             unsigned char mask = pow(2, index + 1) - 1; // 00000001 (Add 1s to the end to access the last 8-(index+1) bits of c)
             unsigned char cEnd = c & mask;              // 00000001
             printf("C END: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(cEnd));
+            printf("\n");
+            printf("\n");
             byte = cEnd << (NUM_BITS_IN_BYTE - (index + 1)); // 10000000 (shift those end elements to the beginning of byte)
             index = index + 1;
         }
         else
         {
+            printf("INDEX: %d ", index);
+            printf("\n");
             index++; // Byte already has zeros at the end, so just shift the byte index
         }
         if (index == NUM_BITS_IN_BYTE)
@@ -152,9 +161,11 @@ void compress(char *postOrder, int postOrderLength, codeTableEntry *codeTable, i
 {
     // Open file:
     FILE *fp = fopen(filename, "wb");
-    // fwrite(postOrder, sizeof(char), postOrderLength, fp); // Old, non-compressed post order
+#ifndef FULL_POST
     compressAndWritePostOrder(postOrder, postOrderLength, fp);
-
+#else
+    fwrite(postOrder, sizeof(char), postOrderLength, fp); // Old, non-compressed post order
+#endif
     char *code;                            // The huffman code of a character in the article
     char byte[NUM_BITS_IN_BYTE + 1] = {0}; // An array (with a terminating null character) that will be filled with "bits" and written to the output file
 

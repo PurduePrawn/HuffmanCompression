@@ -1,5 +1,7 @@
+
+OPTION = 
 compile:
-	gcc -std=c11 -g -Wall -Wshadow -pedantic -Wvla -Werror *.c -lm
+	gcc -std=c11 -g -Wall -Wshadow -pedantic -Wvla -Werror $(OPTION) *.c -lm
 
 test%: compile
 	./a.out inputs/test$* output$*

@@ -22,6 +22,7 @@ void displayTree(TreeNode *root, int generation)
     displayTree(root->left, generation + 1);
     displayTree(root->right, generation + 1);
 }
+
 TreeNode *generateHuffmanTree(int *charFrequencies, int length, int *numNodes)
 {
     List list = {.tail = NULL,
@@ -37,8 +38,8 @@ TreeNode *generateHuffmanTree(int *charFrequencies, int length, int *numNodes)
         TreeNode *tn = createTreeNode(character, frequency);
         *numNodes = *numNodes + 1;
         appendListNode(&list, tn);
-        printf("char: %c, ", tn->character);
-        printf("freq: %d \n", tn->frequency);
+        // printf("char: %c, ", tn->character);
+        // printf("freq: %d \n", tn->frequency);
     }
 
     // While list has more than one entry:
@@ -46,10 +47,10 @@ TreeNode *generateHuffmanTree(int *charFrequencies, int length, int *numNodes)
     {
         ListNode *first = list.head;
         ListNode *second = first->next;
-        printf("char1: %c, ", first->tree->character);
-        printf("freq1: %d \n", first->tree->frequency);
-        printf("char2: %c, ", second->tree->character);
-        printf("freq2: %d \n", second->tree->frequency);
+        // printf("char1: %c, ", first->tree->character);
+        // printf("freq1: %d \n", first->tree->frequency);
+        // printf("char2: %c, ", second->tree->character);
+        // printf("freq2: %d \n", second->tree->frequency);
         // Generate tree node with children as first two elements in linked list and frequency as sum of children's frequencies:
         TreeNode *subtree = createTreeNode(0, first->tree->frequency + second->tree->frequency);
         *numNodes = *numNodes + 1;
@@ -61,10 +62,10 @@ TreeNode *generateHuffmanTree(int *charFrequencies, int length, int *numNodes)
 
         // Find where to put subtree to maintain sorted frequencies and put it there:
         ListNode *ln = list.head;
-        printf("subtree: %d\n", subtree->frequency);
+        // printf("subtree: %d\n", subtree->frequency);
         while (ln != NULL && subtree->frequency >= ln->tree->frequency)
         {
-            printf("%c %d\n", ln->tree->character, ln->tree->frequency);
+            // printf("%c %d\n", ln->tree->character, ln->tree->frequency);
             ln = ln->next;
         }
         if (ln == NULL)
