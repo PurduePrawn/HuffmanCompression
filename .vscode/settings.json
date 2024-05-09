@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "stdbool.h": "c",
-        "regentree.h": "c"
+        "regentree.h": "c",
+        "structures.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c"
     }
 }

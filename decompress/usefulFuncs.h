@@ -1,1 +1,0 @@
-int checkArgs(int count);
