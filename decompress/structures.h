@@ -1,5 +1,5 @@
 #ifndef HEADER_STRUCTURES_INCLUDED
-#define HEADER_STRUTURES_INCLUDED
+#define HEADER_STRUCTURES_INCLUDED
 
 // One tree node:
 typedef struct TreeNode
@@ -37,4 +37,4 @@ typedef struct codeTableEntry
     char *code;
 } codeTableEntry;
 
-#endif // HEADER_STRUTURES_INCLUDED
+#endif // HEADER_STRUCTURES_INCLUDED

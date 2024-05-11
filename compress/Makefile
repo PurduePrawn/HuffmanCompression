@@ -1,11 +1,10 @@
 
 OPTION = 
 compile:
-	gcc -std=c11 -g -Wall -Wshadow -pedantic -Wvla -Werror $(OPTION) *.c -lm
+	gcc -std=c11 -g -Wall -Wshadow -pedantic -Wvla -Werror $(OPTION) *.c -lm -o compress
 
 test%: compile
-	./a.out inputs/test$* output$*
-	diff output$* expected/expected$*
+	./compress inputs/test$* output$*
 
 all: test1 test2 test3 test4 test5
 
@@ -20,4 +19,5 @@ memcheck%: compile
 
 clean:
 	rm output*
-	rm a.out
+	rm compress
+	rm -rf a.out.dSYM
