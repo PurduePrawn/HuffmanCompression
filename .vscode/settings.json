@@ -5,6 +5,10 @@
         "structures.h": "c",
         "string.h": "c",
         "stdlib.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "math.h": "c",
+        "list.h": "c",
+        "ios": "c",
+        "cstddef": "c"
     }
 }

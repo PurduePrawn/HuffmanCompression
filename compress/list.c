@@ -1,4 +1,9 @@
-#include "tree.h"
+#include "list.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
+#include <string.h>
 
 int listLength(List *list)
 {
@@ -11,6 +16,7 @@ int listLength(List *list)
     }
     return length;
 }
+
 // Create and add a node (referencing a tree) to the end of a linked list:
 void appendListNode(List *list, TreeNode *tree)
 {
@@ -56,7 +62,8 @@ void insertListNode(List *list, TreeNode *newTree, ListNode *left, ListNode *rig
     newNode->next = right;
     if (left == NULL)
     {
-        newNode = list->head;
+        list->head = newNode;
+        printf("INSERTING AT HEAD\n");
     }
     else
     {
@@ -95,27 +102,4 @@ void deleteListNode(List *list, ListNode *todelete)
 
         ln = ln->next;
     }
-}
-
-// Allocates and initialize tree node with value val:
-TreeNode *createTreeNode(char character, int frequency)
-{
-    TreeNode *tn = malloc(sizeof(TreeNode));
-    tn->left = NULL;
-    tn->right = NULL;
-    tn->character = character;
-    tn->frequency = frequency;
-    return tn;
-}
-
-TreeNode *deleteTree(TreeNode *root)
-{
-    if (root == NULL)
-        return NULL;
-
-    root->left = deleteTree(root->left);
-    root->right = deleteTree(root->right);
-    free(root);
-
-    return NULL;
 }

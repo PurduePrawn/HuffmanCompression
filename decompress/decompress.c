@@ -1,47 +1,46 @@
+#include "regenTree.h"
+#include "structures.h"
+#include "tree.h"
+#include "decode.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include "structures.h"
-typedef unsigned char Byte;
-void decompress(FILE *input, FILE *output, long int postOrderEnd, TreeNode *root, long int numChars)
+#include <string.h>
+
+int main(int argc, char **argv)
 {
-    fseek(input, postOrderEnd, SEEK_SET);
-    printf("END: %d\n", (int)postOrderEnd);
-    char c = fgetc(input);
-    Byte b;
-    TreeNode *tn = root;
-    long int count = 0;
-    while (c != EOF)
+    // Check arg count:
+    if (argc != 3)
     {
-        b = c;
-        printf("BYTE: %x\n", b);
-        for (int i = 7; i >= 0; i--)
-        {
-            if (count >= numChars)
-            {
-                return;
-            }
-            if (!(tn->right) && !(tn->left)) // if leaf
-            {
-                count++;
-                fputc(tn->val, output);
-                printf("%c", tn->val);
-                tn = root;
-            }
-            Byte mask = pow(2, i);
-            printf("MASK: %x\n", mask);
-            if (b & mask)
-            {
-                // GO RIGHT
-                tn = tn->right;
-            }
-            else
-            {
-                // GO LEFT
-                tn = tn->left;
-            }
-        }
-        c = fgetc(input);
+        perror("Please enter an input and output filename.");
+        return EXIT_FAILURE;
     }
+
+    // Input file
+    FILE *compressedFile = fopen(argv[1], "rb");
+    // Huffman tree:
+    Tree tree;
+    int numLeafs = 0; // Number of unique characters/leafs in the tree, necessary to set length of code table;
+    // Regenerate huffman tree from compressed file
+    long int postOrderEnd; // Marks the end of the post order traversal in the input file (and the start of actual huffman code)
+
+    tree.root = regenTree(compressedFile, &numLeafs, &postOrderEnd);
+
+    codeTableEntry *codeTable = malloc(numLeafs * sizeof(codeTableEntry));
+    // Create code table
+    // generateCodeTable(tree.root, codeTable);
+    // printf("CODE TABLE: \n");
+    // for (int i = 0; i < numLeafs; i++)
+    // {
+    //     printf("Char: %c | Code: %s\n", codeTable[i].val, codeTable[i].code);
+    // }
+    // free(codeTable);
+    // // Make new file that turns all huffman codes back into their characters
+    FILE *outputFile = fopen(argv[2], "w");
+    decode(compressedFile, outputFile, postOrderEnd, tree.root);
+    // Done!
+    fclose(compressedFile);
+    fclose(outputFile);
+    return EXIT_SUCCESS;
 }

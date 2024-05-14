@@ -1,78 +1,14 @@
+#include "utils.h"
+#include "genTree.h"
+#include "codeTable.h"
+#include "compress.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
-#include "tree.h"
 
 #define ASCII_COUNT 256
-
-// Allocate memory for a string and add all characters in the file into the string plus a null character:
-void readFile(char *filename, char **arr, int *length)
-{
-    FILE *fp = fopen(filename, "r");
-
-    // Find size of file:
-    fseek(fp, 0, SEEK_END);
-    long int size = ftell(fp);
-    *length = size / sizeof(char);
-
-    // Allocate memory plus space for null character:
-    *arr = malloc(size + sizeof(char));
-
-    // Copy contents of file into array:
-    fseek(fp, 0, SEEK_SET);
-    fread(*arr, sizeof(char), size / sizeof(char), fp);
-
-    // Add null character to end of allocated memory
-    *(*arr + size) = '\0';
-
-    fclose(fp);
-}
-
-bool countChar(char *filename, int *counts, int size)
-{
-    // open a file whose name is filename for reading
-    FILE *fp = fopen(filename, "r");
-    // if fopen fails, return false. Do NOT fclose
-    if (fp == NULL)
-    {
-        return false;
-    }
-    // if fopen succeeds, read every character from the file
-    //
-    // if a character (call it onechar) is between
-    // 0 and size - 1 (inclusive), increase
-    // counts[onechar] by one
-    // You should *NOT* assume that size is 256
-    // reemember to call fclose
-    // you may assume that counts already initialized to zero
-    // size is the size of counts
-    // you may assume that counts has enough memory space
-    //
-    // hint: use fgetc
-    // Please read the document of fgetc carefully, in particular
-    // when reaching the end of the file
-    //
-
-    int onechar; // Character ASCII value serving as an index for counts[]
-    do
-    {
-        onechar = fgetc(fp);
-        if (0 <= onechar && onechar <= size - 1)
-        {
-            counts[onechar]++;
-        }
-    } while (onechar != EOF);
-    fclose(fp);
-    return true;
-}
-
-// Takes the FREQUENCY part (which is right next to its character) of eeach character and compares them:
-int cmpfunc(const void *a, const void *b)
-{
-    return ((*((int *)a + 1)) - *((int *)b + 1));
-}
 
 int main(int argc, char **argv)
 {
@@ -82,9 +18,11 @@ int main(int argc, char **argv)
     {
         return EXIT_FAILURE;
     }
-    int counts[ASCII_COUNT] = {0};
+
+    long int counts[ASCII_COUNT] = {0}; // Counts of each character (indexed by its ASCII code)
     countChar(argv[1], counts, ASCII_COUNT);
-    int numDiffChars = 0;
+    printf("There are %ld ds\n", counts[(int)'d']);
+    int numDiffChars = 0; // Number of unique characters in the file
     for (int i = 0; i < ASCII_COUNT; i++)
     {
         if (counts[i])
@@ -92,59 +30,67 @@ int main(int argc, char **argv)
             numDiffChars++;
         }
     }
+    printf("There are %d different characters \n", numDiffChars);
 
-    // 2d array to store character ASCIIs and their corresponding frequencies in the file (<char>, <frequency>):
-    int *charFrequencies = malloc(2 * numDiffChars * sizeof(int));
-    int j = 0;
-    for (int i = 0; i < ASCII_COUNT; i++)
+    // Preliminary array of character/frequency tree nodes (not a tree) to simply sort them by frequency:
+    TreeNode *charFrequencies = malloc(numDiffChars * sizeof(TreeNode));
+    int tnIndex = 0;
+    for (int countsIndex = 0; countsIndex < ASCII_COUNT; countsIndex++) // Go through 256 elem count array
     {
-        if (counts[i])
+        if (counts[countsIndex] > 0) // If a character appears in the file
         {
-            charFrequencies[j++] = i;
-            charFrequencies[j++] = counts[i];
+            if (countsIndex == 'H')
+            {
+                printf("H found %ld times\n", counts[countsIndex]);
+            }
+            // Add it and its frequency to charFrequencies:
+            charFrequencies[tnIndex].character = (char)countsIndex;
+            charFrequencies[tnIndex].frequency = counts[countsIndex];
+            tnIndex++;
         }
     }
 
-    // for (j = 0; j < numDiffChars; j++)
-    // {
-    //     printf("%c: %d\n", charFrequencies[j * 2], charFrequencies[j * 2 + 1]);
-    // }
-    qsort(charFrequencies, numDiffChars, sizeof(int) * 2, cmpfunc);
-    // for (j = 0; j < numDiffChars; j++)
-    // {
-    //     printf("%c: %d\n", charFrequencies[j * 2], charFrequencies[j * 2 + 1]);
-    // }
+    // Sort array elements by ascending frequency:
+    qsort(charFrequencies, numDiffChars, sizeof(TreeNode), cmpfunc /*ascending frequency (see utils.c)*/);
+    for (int i = 0; i < numDiffChars; i++)
+    {
+        printf("%c, %ld\n", charFrequencies[i].character, charFrequencies[i].frequency);
+    }
+    // Get text from input file:
+    char *txt;
+    long int txtLength; // LONG INTEGER (for large files)
+    readFile(argv[1], &txt, &txtLength);
 
-    // Get end of article from input file:
-    char *article;
-    int articleLength;
-    readFile(argv[1], &article, &articleLength);
-
-    // Allocate stack memory to store the root of a tree:
-    Tree tree;
-    int numTreeNodes = 0;
-    // Generate a tree in the heap from the post order traversal and assign the root's address to tree.root:
-    tree.root = generateHuffmanTree(charFrequencies, 2 * numDiffChars, &numTreeNodes);
-#ifdef TREE
-    displayTree(tree.root, 1);
-    tree.root = deleteTree(tree.root);
-    return EXIT_SUCCESS;
-#endif
+    // Combine sorted leaf nodes into huffman tree:
+    Tree tree = generateHuffmanTree(charFrequencies, numDiffChars);
+    displayTree(tree.root, 0);
+    printf("Node Count: %d \nLeaf Count: %d\n", tree.nodeCount, tree.leafCount);
 
     // Allocate enough memory to store a code table:
     codeTableEntry *codeTable = malloc(numDiffChars * sizeof(codeTableEntry)); // Allocate space for code table
     // Generate the code table:
     generateCodeTable(tree.root, codeTable);
+    // Code Table:
+    for (int i = 0; i < numDiffChars; i++)
+    {
+        if (codeTable[i].val == '\n')
+        {
+            printf("/N| %s\n", codeTable[i].code);
+        }
+        else
+        {
+            printf("%c | %s\n", codeTable[i].val, codeTable[i].code);
+        }
+    }
 
     // Generate post order traversal of binary tree:
-    int postOrderLength = numTreeNodes + numDiffChars + 1; // Account for control bits and terminating 0
+    int postOrderLength = tree.nodeCount + tree.leafCount + 1; // Account for control bits and terminating 0
     char *postOrder = generatePostOrder(tree, postOrderLength);
 
     // Use the code table to compress the article into binary code:
-    compress(postOrder, postOrderLength, codeTable, numDiffChars, article, argv[2]);
-
+    compress(postOrder, postOrderLength, codeTable, numDiffChars, txt, argv[2]);
     free(postOrder); // Free the post order array
-    free(article);   // Free the article
+    free(txt);       // Free the article
 
     // Free all of the code table's memory:
     for (int i = 0; i < numDiffChars; i++)
@@ -153,6 +99,7 @@ int main(int argc, char **argv)
     }
     free(codeTable);
 
-    tree.root = deleteTree(tree.root); // Delete the tree
+    tree = deleteTree(tree); // Delete the tree
+
     return EXIT_SUCCESS;
 }
