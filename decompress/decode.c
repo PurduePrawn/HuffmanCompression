@@ -17,7 +17,7 @@ void decode(FILE *input, FILE *output, long int postOrderEnd, TreeNode *root)
     while (c != EOF)
     {
         b = c;
-        printf("BYTE: %x\n", b);
+        // printf("BYTE: %x\n", b);
         for (int i = 7; i >= 0; i--)
         {
             if (count >= numChars)
@@ -28,11 +28,11 @@ void decode(FILE *input, FILE *output, long int postOrderEnd, TreeNode *root)
             {
                 count++;
                 fputc(tn->val, output);
-                printf("%c", tn->val);
+                // printf("%c", tn->val);
                 tn = root;
             }
             Byte mask = pow(2, i);
-            printf("MASK: %x\n", mask);
+            // printf("MASK: %x\n", mask);
             if (b & mask)
             {
                 // GO RIGHT
