@@ -58,11 +58,13 @@ void compressAndWritePostOrder(char *postOrder, int postOrderLength, FILE *file)
             unsigned char cNew = c >> (index + 1); // 00110100 (shift c to get to the index after the control bit)
             printf("C NEW: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(cNew));
             printf("\n");
-            byte = byte | control | cNew;               // 10110100 (Add byte, control, and part of the character byte together into a completed byte)
-            fputc((int)byte, file);                     // Write the byte to the file
-            unsigned char mask = pow(2, index + 1) - 1; // 00000001 (Add 1s to the end to access the last 8-(index+1) bits of c)
-            unsigned char cEnd = c & mask;              // 00000001
-            printf("C END: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(cEnd));
+            byte = byte | control | cNew; // 10110100 (Add byte, control, and part of the character byte together into a completed byte)
+            printf("COMPLETE BYTE: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(byte));
+            printf("\n");
+            fputc((int)byte, file);                                         // Write the byte to the file
+            unsigned char mask = pow(2, index + 1) - 1;                     // 00000001 (Add 1s to the end to access the last 8-(index+1) bits of c)
+            unsigned char cEnd = c & mask;                                  // 00000001
+            printf("C END: " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(cEnd)); // THE REST OF C THAT HAS NOT BEEN COPIED INTO THIS BYTE
             printf("\n");
             printf("\n");
             byte = cEnd << (NUM_BITS_IN_BYTE - (index + 1)); // 10000000 (shift those end elements to the beginning of byte)

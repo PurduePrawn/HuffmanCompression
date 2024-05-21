@@ -3,7 +3,7 @@
 #include "stdio.h"
 #include "string.h"
 // Recursive helper function to generate huffman codes:
-void generateCodeEntries(TreeNode *node, codeTableEntry *codeTable, int *index, int iterations, int codeAsDecimal)
+void generateCodeEntries(TreeNode *node, codeTableEntry *codeTable, int *index, int iterations, long int codeAsDecimal)
 {
     // BASE CASE:
     if (!node)
@@ -12,9 +12,13 @@ void generateCodeEntries(TreeNode *node, codeTableEntry *codeTable, int *index, 
     // If the current node is a leaf node, add its code string to the code table:
     if (node->character)
     {
+        if (node->character == 'z')
+        {
+            printf("z FOUND with code %ld\n", codeAsDecimal);
+        }
         codeTable[*index].val = node->character;
-        codeTable[*index].code = malloc(iterations + 1);
-        sprintf(codeTable[*index].code, "%0*d", iterations, codeAsDecimal);
+        codeTable[*index].code = calloc(1, iterations + 1);
+        sprintf(codeTable[*index].code, "%0*ld", iterations, codeAsDecimal);
         *index = *index + 1;
     }
 
@@ -29,7 +33,7 @@ void generateCodeTable(TreeNode *node, codeTableEntry *codeTable)
 {
     int tableIndex = 0;
     int iterations = 0;
-    int codeAsDecimal = 0;
+    long int codeAsDecimal = 0;
     generateCodeEntries(node, codeTable, &tableIndex, iterations, codeAsDecimal);
 }
 

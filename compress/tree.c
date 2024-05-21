@@ -7,7 +7,7 @@
 // Allocates and initialize tree node with value val:
 TreeNode *createTreeNode(char character, long int frequency)
 {
-    TreeNode *tn = malloc(sizeof(TreeNode));
+    TreeNode *tn = calloc(1, sizeof(TreeNode));
     tn->left = NULL;
     tn->right = NULL;
     tn->character = character;
@@ -89,7 +89,7 @@ char *generatePostOrder(Tree tree, int length)
         return NULL;
     }
     int index = 0;
-    char *postOrder = malloc(length * sizeof(char)); // Allocate just enough space to store control bits, characters, and terminating 0:
+    char *postOrder = calloc(length, sizeof(char)); // Allocate just enough space to store control bits, characters, and terminating 0:
     recursivePostOrderGen(tree.root, postOrder, &index);
     postOrder[length - 1] = 0; // Terminating 0
 
@@ -97,8 +97,16 @@ char *generatePostOrder(Tree tree, int length)
     printf("UNCOMPRESSED POST ORDER: \n");
     for (int i = 0; i < index + 1; i++)
     {
-        printf("%d ", (int)postOrder[i]);
+        if (postOrder[i] <= 1)
+        {
+            printf("%d ", (int)postOrder[i]);
+        }
+        else
+        {
+            printf("%c ", postOrder[i]);
+        }
     }
+    printf("\n");
 
     return postOrder;
 }

@@ -35,7 +35,7 @@ void appendListNode(List *list, TreeNode *tree)
     }
 
     // Allocate new list node and connect it to tail:
-    ln = malloc(sizeof(ListNode));
+    ln = calloc(1, sizeof(ListNode));
     ln->next = NULL;
     ln->tree = tree;
 
@@ -56,7 +56,7 @@ void appendListNode(List *list, TreeNode *tree)
 
 void insertListNode(List *list, TreeNode *newTree, ListNode *left, ListNode *right)
 {
-    ListNode *newNode = malloc(sizeof(ListNode));
+    ListNode *newNode = calloc(1, sizeof(ListNode));
     newNode->tree = newTree;
     newNode->prev = left;
     newNode->next = right;

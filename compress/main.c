@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     printf("There are %d different characters \n", numDiffChars);
 
     // Preliminary array of character/frequency tree nodes (not a tree) to simply sort them by frequency:
-    TreeNode *charFrequencies = malloc(numDiffChars * sizeof(TreeNode));
+    TreeNode *charFrequencies = calloc(numDiffChars, sizeof(TreeNode));
     int tnIndex = 0;
     for (int countsIndex = 0; countsIndex < ASCII_COUNT; countsIndex++) // Go through 256 elem count array
     {
@@ -86,7 +86,6 @@ int main(int argc, char **argv)
     // Generate post order traversal of binary tree:
     int postOrderLength = tree.nodeCount + tree.leafCount + 1; // Account for control bits and terminating 0
     char *postOrder = generatePostOrder(tree, postOrderLength);
-
     // Use the code table to compress the article into binary code:
     compress(postOrder, postOrderLength, codeTable, numDiffChars, txt, argv[2]);
     free(postOrder); // Free the post order array
