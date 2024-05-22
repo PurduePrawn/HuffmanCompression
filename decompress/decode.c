@@ -14,8 +14,9 @@ void decode(FILE *input, FILE *output, long int postOrderEnd, TreeNode *root)
     Byte b;
     TreeNode *tn = root;
     long int count = 0;
-    while (c != EOF)
+    while (!feof(input))
     {
+        printf("Starting while loop iteration\n");
         b = c;
         // printf("BYTE: %x\n", b);
         for (int i = 7; i >= 0; i--)
@@ -28,22 +29,26 @@ void decode(FILE *input, FILE *output, long int postOrderEnd, TreeNode *root)
             {
                 count++;
                 fputc(tn->val, output);
-                // printf("%c", tn->val);
+                printf("char: %c\n", tn->val);
                 tn = root;
             }
             Byte mask = pow(2, i);
-            // printf("MASK: %x\n", mask);
+            printf("MASK: %x\n", mask);
             if (b & mask)
             {
                 // GO RIGHT
                 tn = tn->right;
+                printf("went right\n");
             }
             else
             {
                 // GO LEFT
                 tn = tn->left;
+                printf("went left\n");
             }
         }
         c = fgetc(input);
+        printf("Location: %ld\n", ftell(input));
+        printf("C is %d\n", (int)c);
     }
 }

@@ -98,7 +98,5 @@ int main(int argc, char **argv)
     }
     free(codeTable);
 
-    tree = deleteTree(tree); // Delete the tree
-
     return EXIT_SUCCESS;
 }
